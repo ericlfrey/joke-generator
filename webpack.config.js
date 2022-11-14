@@ -3,13 +3,17 @@ const HtmlWebPackPlugin = require('html-webpack-plugin');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const CssMinimizerPlugin = require("css-minimizer-webpack-plugin");
 const ESLintPlugin = require('eslint-webpack-plugin');
+const { SourceMapDevToolPlugin } = require("webpack");
 
 const path = require('path');
-const dotenv = require('dotenv').config({path: __dirname + '/.env'});
+const dotenv = require('dotenv').config({ path: __dirname + '/.env' });
 
 module.exports = {
   entry: './public/main.js',
   plugins: [
+    new SourceMapDevToolPlugin({
+      filename: "[file].map"
+    }),
     new HtmlWebPackPlugin({
       hash: true,
       template: "./public/index.html",
@@ -19,13 +23,18 @@ module.exports = {
       filename: "[name].css",
       chunkFilename: "[id].css"
     }),
-    new webpack.DefinePlugin( {
+    new webpack.DefinePlugin({
       'process.env': JSON.stringify(process.env || dotenv.parsed),
     }),
     new ESLintPlugin()
   ],
   module: {
     rules: [
+      {
+        test: /\.js$/,
+        enforce: 'pre',
+        use: ['source-map-loader'],
+      },
       {
         test: /\.scss$/,
         use: [
